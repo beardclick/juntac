@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --verde: #254A39;
+  --verde-light: #2d5a46;
+  --verde-dark: #1a3829;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Header transitions */
+.header-transparent { background: transparent; transition: all 0.3s ease; }
+.header-sticky { background: white; box-shadow: 0 2px 20px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+.top-header { min-height: 42px; }
+
+/* Hero */
+.hero-section { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.hero-overlay { position: absolute; inset: 0; background: rgba(37, 74, 57, 0.75); z-index: 1; }
+.hero-grafico { position: absolute; bottom: 0; left: 0; width: 100%; z-index: 2; }
+.hero-content { position: relative; z-index: 3; }
+
+/* Parallax image section */
+.parallax-image {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+}
+@media (max-width: 768px) {
+  .parallax-image { background-attachment: scroll; }
+}
+
+/* Status badges */
+.badge-activo { background: #22c55e; color: white; }
+.badge-adjudicado { background: #3b82f6; color: white; }
+.badge-expirado { background: #ef4444; color: white; }
+.badge-desierto { background: #f59e0b; color: white; }
+
+/* CTA section */
+.cta-image { margin-top: -80px; }
+
+/* Animations */
+.fade-up { opacity: 0; transform: translateY(40px); }
+.fade-up.animated { opacity: 1; transform: translateY(0); transition: all 0.8s ease; }
+
+/* Swiper custom */
+.swiper-pagination-bullet-active { background: var(--verde) !important; }
+
+/* Admin styles */
+.admin-sidebar { width: 260px; }
+.admin-content { margin-left: 260px; }
+@media (max-width: 768px) {
+  .admin-sidebar { transform: translateX(-100%); position: fixed; z-index: 50; }
+  .admin-sidebar.open { transform: translateX(0); }
+  .admin-content { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
