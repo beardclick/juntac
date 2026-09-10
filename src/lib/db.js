@@ -1,8 +1,9 @@
-import { initialNews, initialPurchases, initialCategories } from './initial-data'
+import { initialPurchases, initialCategories } from './initial-data'
+import wordpressNews from './wordpress-news.json'
 import { createServerClient, createAdminClient } from './supabase'
 
 // In-memory runtime storage for when Supabase is not connected
-let memoryNews = [...initialNews]
+let memoryNews = [...wordpressNews]
 let memoryPurchases = [...initialPurchases]
 let memoryReports = []
 let memoryMedia = [

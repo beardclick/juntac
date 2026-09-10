@@ -69,3 +69,16 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+.wordpress-content p {
+  margin: 0 0 1.25rem;
+}
+
+.wordpress-content a {
+  color: #254a39;
+  text-decoration: underline;
+}
+
+/* The XML gallery is rendered below with the site's responsive gallery grid. */
+.wordpress-content .wp-block-gallery {
+  display: none;
+}

@@ -5,13 +5,17 @@ import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
+function toPlainText(value = '') {
+  return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = params
   const noticia = await getNewsBySlug(slug)
   if (!noticia) return { title: 'Noticia | Junta Comunal David Sur' }
   return {
     title: `${noticia.title} | Junta Comunal de David Sur`,
-    description: noticia.excerpt || noticia.content?.slice(0, 160)
+    description: noticia.excerpt || toPlainText(noticia.content).slice(0, 160)
   }
 }
 
@@ -76,11 +80,10 @@ export default async function NoticiaDetailPage({ params }) {
           </h1>
 
           {/* Content */}
-          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed text-justify space-y-6">
-            {noticia.content.split('\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
+          <div
+            className="wordpress-content prose prose-lg max-w-none text-gray-700 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: noticia.content }}
+          />
 
           {/* Gallery if present */}
           {noticia.gallery && noticia.gallery.length > 0 && (
