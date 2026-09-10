@@ -80,10 +80,12 @@ for (const block of items) {
   const categoryMatch = [...block.matchAll(/<category domain="category" nicename="([^"]*)"><!\[CDATA\[([\s\S]*?)\]\]><\/category>/g)][0]
   const contentImageUrls = [...cdata(block, 'content:encoded').matchAll(/<img[^>]+src=["']([^"']+)["']/gi)]
     .map((match) => decodeXml(match[1]))
+  const elementorGalleryUrls = [...cdata(block, 'content:encoded').matchAll(/<a[^>]+href=["']([^"']+)["'][^>]+data-elementor-open-lightbox=["']yes["']/gi)]
+    .map((match) => decodeXml(match[1]))
   const relatedImages = [...attachments.values()].filter((item) => item.parentId === id && item.mime.startsWith('image/'))
   const featured = attachments.get(thumbnailId)?.url || null
   const content = safeHtml(cdata(block, 'content:encoded'))
-  const gallery = [...new Set([...contentImageUrls, ...relatedImages.map((item) => item.url)])]
+  const gallery = [...new Set([...contentImageUrls, ...elementorGalleryUrls, ...relatedImages.map((item) => item.url)])]
     .filter((url) => url && url !== featured)
   const publishedAt = new Date(text(block, 'pubDate')).toISOString()
 
