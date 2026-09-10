@@ -1,6 +1,6 @@
 # Despliegue en Hostinger con GitHub y Supabase
 
-Esta aplicación necesita hosting para Node.js; no debe publicarse como un sitio HTML estático. En Hostinger utiliza un plan **Business Web Hosting** o **Cloud** con soporte para aplicaciones Node.js.
+Esta aplicación necesita hosting para **Node.js**; no debe publicarse como un sitio HTML estático. En Hostinger usa **Hostinger Horizons** (el producto de Web Apps / Node.js; en hPanel aparece como "Web App" o "Node.js Web App") o un **VPS**. El hosting compartido (Premium / Business / Cloud Web Hosting) **no ejecuta Node.js**, así que no sirve para este proyecto.
 
 ## 1. Preparar Supabase
 
@@ -36,10 +36,10 @@ Antes de hacer `git add`, comprueba que `.env.local`, `.next` y `node_modules` n
 
 ## 3. Crear la aplicación en Hostinger
 
-1. En hPanel entra en **Websites > Add Website**.
-2. Selecciona **Deploy Web App / Node.js Web App**.
-3. Elige **Import Git Repository** y autoriza GitHub.
-4. Selecciona el repositorio y la rama `main`.
+1. En hPanel entra en **Websites > Add Website** (asegúrate de tener un plan con **Horizons / Node.js**, no solo hosting compartido).
+2. Selecciona **Web App / Node.js Web App** (Hostinger Horizons).
+3. Elige **Import from Git**: autoriza GitHub para elegir el repo, o pega directamente la URL `https://github.com/beardclick/juntac.git`.
+4. Selecciona la rama `main`.
 5. Usa estos ajustes:
    - Framework: **Next.js**
    - Node.js: **20.x**
