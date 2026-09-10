@@ -20,6 +20,33 @@ function hasSupabaseConfig() {
   return url && !url.includes('your_supabase') && key && !key.includes('your_supabase')
 }
 
+// Resolve the news category name (e.g. "Gestión") to its numeric id, since the
+// `news` table stores `category_id` (FK) and the admin form submits the name.
+async function resolveCategoryId(categoryName) {
+  if (!categoryName) return null
+  try {
+    const supabase = createServerClient()
+    const { data, error } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('name', categoryName)
+      .maybeSingle()
+    if (!error && data) return data.id
+  } catch (e) {
+    console.warn('resolveCategoryId warning:', e.message)
+  }
+  return null
+}
+
+async function prepareNewsPayload(newsData) {
+  const { category, category_id, ...rest } = newsData
+  let resolvedId = category_id != null ? category_id : null
+  if (resolvedId == null && category) {
+    resolvedId = await resolveCategoryId(category)
+  }
+  return { ...rest, category_id: resolvedId }
+}
+
 // ---------------- NEWS ----------------
 export async function getNews({ limit = 100, page = 1 } = {}) {
   if (hasSupabaseConfig()) {
@@ -83,7 +110,8 @@ export async function createNews(newsData) {
   if (hasSupabaseConfig()) {
     try {
       const admin = createAdminClient()
-      const { data, error } = await admin.from('news').insert([newsData]).select().single()
+      const payload = await prepareNewsPayload(newsData)
+      const { data, error } = await admin.from('news').insert([payload]).select().single()
       if (!error && data) return data
     } catch (e) {
       console.warn('Supabase createNews fallback:', e.message)
@@ -103,7 +131,8 @@ export async function updateNews(id, newsData) {
   if (hasSupabaseConfig()) {
     try {
       const admin = createAdminClient()
-      const { data, error } = await admin.from('news').update(newsData).eq('id', id).select().single()
+      const payload = await prepareNewsPayload(newsData)
+      const { data, error } = await admin.from('news').update(payload).eq('id', id).select().single()
       if (!error && data) return data
     } catch (e) {
       console.warn('Supabase updateNews fallback:', e.message)

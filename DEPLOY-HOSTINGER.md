@@ -61,15 +61,19 @@ SUPABASE_SERVICE_ROLE_KEY=TU_SERVICE_ROLE_KEY
 NODE_ENV=production
 ```
 
-Para enviar reportes por correo agrega también:
+El envío de correo es **opcional**. Si no configuras estas variables, los reportes ciudadanos se guardan igual en Supabase y simplemente se omite el aviso por correo.
+
+Para activar el aviso con el correo de Hostinger: crea una cuenta en **hPanel > Emails** (por ejemplo `noreply@tu-dominio.com`) y usa estas variables:
 
 ```dotenv
-SMTP_HOST=servidor-smtp
-SMTP_PORT=587
-SMTP_USER=correo@tu-dominio.com
-SMTP_PASS=contraseña-o-app-password
+SMTP_HOST=smtp.hostinger.com
+SMTP_PORT=465
+SMTP_USER=noreply@tu-dominio.com
+SMTP_PASS=la-contraseña-de-esa-cuenta
 REPORT_RECIPIENT=correo-que-recibe-los-reportes@tu-dominio.com
 ```
+
+Nota: Hostinger no ofrece un "noreply" automático; debes crear la cuenta de correo primero. Con `SMTP_PORT=465` la aplicación usa SSL (`secure`).
 
 No necesitas `ADMIN_EMAIL` ni `ADMIN_PASSWORD` cuando autenticas al administrador mediante Supabase Auth. No copies `.env.local` al repositorio.
 

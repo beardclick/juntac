@@ -9,13 +9,10 @@ export async function POST() {
     try {
       const supabase = createServerClient()
       await supabase.auth.signOut()
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Logout signOut warning:', e.message)
+    }
   }
 
-  const response = NextResponse.json({ success: true })
-  response.cookies.set('admin_session', '', {
-    maxAge: 0,
-    path: '/'
-  })
-  return response
+  return NextResponse.json({ success: true })
 }

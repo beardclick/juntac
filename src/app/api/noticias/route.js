@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getNews, createNews } from '@/lib/db'
+import { isAdminAuthenticated } from '@/lib/auth'
 
 export async function GET(request) {
   try {
@@ -16,6 +17,10 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
     const body = await request.json()
     if (!body.title || !body.content) {
       return NextResponse.json({ error: 'Título y contenido son requeridos' }, { status: 400 })

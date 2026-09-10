@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getMedia, addMedia, deleteMedia } from '@/lib/db'
 import { createAdminClient } from '@/lib/supabase'
+import { isAdminAuthenticated } from '@/lib/auth'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
@@ -15,6 +16,10 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
     const formData = await request.formData()
     const file = formData.get('file')
 
@@ -95,6 +100,10 @@ export async function POST(request) {
 
 export async function DELETE(request) {
   try {
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 

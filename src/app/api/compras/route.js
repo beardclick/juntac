@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getPurchases, createPurchase } from '@/lib/db'
+import { isAdminAuthenticated } from '@/lib/auth'
 
 export async function GET() {
   try {
@@ -12,6 +13,10 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
     const body = await request.json()
     if (!body.title || !body.description) {
       return NextResponse.json({ error: 'Título y descripción son requeridos' }, { status: 400 })

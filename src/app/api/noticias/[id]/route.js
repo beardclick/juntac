@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { updateNews, deleteNews, getNews } from '@/lib/db'
+import { isAdminAuthenticated } from '@/lib/auth'
 
 export async function GET(request, { params }) {
   try {
@@ -19,6 +20,10 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
     const { id } = params
     const body = await request.json()
     const updated = await updateNews(id, body)
@@ -35,6 +40,10 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
     const { id } = params
     await deleteNews(id)
     return NextResponse.json({ success: true })
