@@ -4,23 +4,27 @@ import Link from 'next/link'
 
 const STATUSES = ['ACTIVO', 'ADJUDICADO', 'EXPIRADO', 'DESIERTO']
 
-function statusLabel(status) {
-  switch ((status || '').toUpperCase()) {
-    case 'ACTIVO': return 'ACTIVO'
-    case 'ADJUDICADO': return 'ADJUDICADO'
-    case 'EXPIRADO': return 'EXPIRADO'
-    case 'DESIERTO': return 'DECLARADO DESIERTO'
-    default: return (status || '').toUpperCase()
-  }
-}
-
-function badgeClass(status) {
-  switch ((status || '').toUpperCase()) {
-    case 'ACTIVO': return 'badge-activo'
-    case 'ADJUDICADO': return 'badge-adjudicado'
-    case 'EXPIRADO': return 'badge-expirado'
-    case 'DESIERTO': return 'badge-desierto'
-    default: return 'bg-gray-500 text-white'
+// Same dual-badge behavior as the single (detail) view:
+// adjudicado/desierto also show "EXPIRADO" because their reception deadline passed.
+function getBadges(status) {
+  const s = (status || '').toUpperCase()
+  switch (s) {
+    case 'ADJUDICADO':
+      return [
+        { label: 'EXPIRADO', cls: 'badge-expirado' },
+        { label: 'ADJUDICADO', cls: 'badge-adjudicado' },
+      ]
+    case 'DESIERTO':
+      return [
+        { label: 'EXPIRADO', cls: 'badge-expirado' },
+        { label: 'DECLARADO DESIERTO', cls: 'badge-desierto' },
+      ]
+    case 'ACTIVO':
+      return [{ label: 'ACTIVO', cls: 'badge-activo' }]
+    case 'EXPIRADO':
+      return [{ label: 'EXPIRADO', cls: 'badge-expirado' }]
+    default:
+      return [{ label: s, cls: 'bg-gray-500 text-white' }]
   }
 }
 
@@ -76,7 +80,7 @@ export default function PurchasesList({ initialPurchases }) {
                   onChange={() => toggleStatus(s)}
                   className="w-4 h-4 rounded accent-[#254A39]"
                 />
-                <span className="text-sm text-gray-700">{statusLabel(s)}</span>
+                <span className="text-sm text-gray-700">{s === 'DESIERTO' ? 'DECLARADO DESIERTO' : s}</span>
               </label>
             ))}
           </div>
@@ -105,7 +109,7 @@ export default function PurchasesList({ initialPurchases }) {
         </div>
       </aside>
 
-      {/* Right: list */}
+      {/* Right: list (single column) */}
       <div className="lg:col-span-3">
         {filtered.length === 0 ? (
           <div className="text-center text-gray-500 py-16 bg-white rounded-xl shadow-sm border border-gray-100">
@@ -115,24 +119,28 @@ export default function PurchasesList({ initialPurchases }) {
           <div className="grid grid-cols-1 gap-6">
             {filtered.map((purchase) => (
               <Link href={`/transparencia/${purchase.slug}`} key={purchase.id} className="block group">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 group-hover:shadow-md group-hover:border-[#254A39]/30 transition-all h-full flex flex-col">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className={`text-xs font-bold px-3 py-1 rounded-md uppercase ${badgeClass(purchase.status)}`}>
-                      {statusLabel(purchase.status)}
-                    </span>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 group-hover:shadow-md group-hover:border-[#254A39]/30 transition-all">
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {getBadges(purchase.status).map((b, i) => (
+                      <span key={i} className={`text-xs font-bold px-3 py-1 rounded-md uppercase ${b.cls}`}>
+                        {b.label}
+                      </span>
+                    ))}
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 group-hover:text-[#254A39] transition-colors line-clamp-2">
+
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 group-hover:text-[#254A39] transition-colors">
                     {purchase.title}
                   </h3>
-                  <div className="mt-auto space-y-2 text-sm border-t border-gray-100 pt-4">
-                    <div className="flex items-start gap-2">
-                      <span className="text-[11px] font-bold text-gray-500 uppercase shrink-0 w-28">Fecha de Publicación</span>
-                      <span className="text-gray-700">{formatDate(purchase.publication_date)}</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-[11px] font-bold text-gray-500 uppercase shrink-0 w-28">Fecha Límite Recepción de Propuestas</span>
-                      <span className="text-gray-700">{formatDate(purchase.deadline_date)}</span>
-                    </div>
+
+                  <div className="border-t border-gray-100 pt-4 space-y-1.5 text-sm text-gray-700">
+                    <p>
+                      <span className="font-bold text-gray-500 uppercase text-[11px]">Fecha de Publicación: </span>
+                      {formatDate(purchase.publication_date)}
+                    </p>
+                    <p>
+                      <span className="font-bold text-gray-500 uppercase text-[11px]">Fecha Límite Recepción de Propuestas: </span>
+                      {formatDate(purchase.deadline_date)}
+                    </p>
                   </div>
                 </div>
               </Link>
