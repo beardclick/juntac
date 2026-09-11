@@ -30,7 +30,7 @@ export default function Header() {
 
   return (
     <>
-      <header className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'header-sticky' : 'header-transparent'}`}>
+      <header className={`fixed w-full z-[500] transition-all duration-300 ${scrolled ? 'header-sticky' : 'header-transparent'}`}>
         {/* Top Header - desktop only, leaves the viewport after scrolling */}
         {!scrolled && <div className="top-header bg-[#254A39] text-white text-sm py-2 hidden md:block">
             <div className="container mx-auto px-6 flex justify-between items-center">
@@ -71,13 +71,13 @@ export default function Header() {
 
           <button
             type="button"
-            className={`md:hidden block rounded-lg p-1.5 ${scrolled ? 'text-gray-800' : 'bg-black/40 text-white'}`}
+            className="md:hidden block rounded-lg p-1.5 bg-[#254A39]"
             onClick={() => setMenuOpen(true)}
             aria-label="Abrir menú"
             aria-expanded={menuOpen}
             aria-controls="mobile-navigation"
           >
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8" fill="none" stroke="#ffffff" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
             </svg>
           </button>
@@ -86,13 +86,13 @@ export default function Header() {
 
       {/* Mobile Menu - opens from RIGHT */}
       <div
-        className={`fixed inset-0 bg-black/50 z-[60] transition-opacity duration-300 md:hidden ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/50 z-[600] transition-opacity duration-300 md:hidden ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setMenuOpen(false)}
         aria-hidden="true"
       ></div>
       <aside
         id="mobile-navigation"
-        className={`fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-white z-[70] shadow-xl overflow-y-auto transition-transform duration-300 ease-out md:hidden ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed inset-y-0 right-0 w-72 max-w-[85vw] bg-white z-[700] shadow-xl overflow-y-auto transition-transform duration-300 ease-out md:hidden ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}
         aria-hidden={!menuOpen}
       >
         <div className="p-6">
