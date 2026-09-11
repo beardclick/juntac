@@ -63,7 +63,7 @@ export default function GalleryLightbox({ images }) {
       {/* Lightbox overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
+          className="fixed inset-0 z-[1000] bg-black/90 flex items-center justify-center"
           onClick={close}
           role="dialog"
           aria-modal="true"
