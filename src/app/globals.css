@@ -15,7 +15,7 @@ body {
 
 /* Header transitions */
 .header-transparent {
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.25) 55%, rgba(0, 0, 0, 0) 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 55%, rgba(0, 0, 0, 0) 100%);
   transition: all 0.3s ease;
 }
 .header-sticky { background: white; box-shadow: 0 2px 20px rgba(0,0,0,0.1); transition: all 0.3s ease; }

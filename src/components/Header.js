@@ -71,13 +71,13 @@ export default function Header() {
 
           <button
             type="button"
-            className="md:hidden block"
+            className={`md:hidden block rounded-lg p-1.5 ${scrolled ? 'text-gray-800' : 'bg-black/40 text-white'}`}
             onClick={() => setMenuOpen(true)}
             aria-label="Abrir menú"
             aria-expanded={menuOpen}
             aria-controls="mobile-navigation"
           >
-            <svg className={`w-8 h-8 ${scrolled ? 'text-gray-800' : 'text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
             </svg>
           </button>
