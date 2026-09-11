@@ -14,7 +14,7 @@ export default function CtaSection() {
     const ctx = gsap.context(() => {
       gsap.from(imageRef.current, {
         opacity: 0,
-        x: 100,
+        y: 40,
         duration: 1.1,
         ease: 'power3.out',
         scrollTrigger: { trigger: imageRef.current, start: 'top 88%', once: true }

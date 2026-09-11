@@ -117,6 +117,7 @@ export async function POST(request) {
           html,
           attachments,
         })
+        console.log('Report email sent to', process.env.REPORT_RECIPIENT || process.env.SMTP_USER)
       } catch (emailErr) {
         console.warn('Email notification error (non-fatal):', emailErr.message)
       }

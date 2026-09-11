@@ -112,7 +112,7 @@ export default function PurchasesList({ initialPurchases }) {
             No hay actos públicos que coincidan con los filtros seleccionados.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {filtered.map((purchase) => (
               <Link href={`/transparencia/${purchase.slug}`} key={purchase.id} className="block group">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 group-hover:shadow-md group-hover:border-[#254A39]/30 transition-all h-full flex flex-col">

@@ -63,7 +63,7 @@ export default function ValoresSection() {
 
       gsap.from(el.querySelectorAll('.valor-icon'), {
         opacity: 0,
-        x: 60,
+        y: 30,
         stagger: 0.15,
         duration: 0.85,
         ease: 'power3.out',

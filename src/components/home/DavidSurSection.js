@@ -24,10 +24,10 @@ export default function DavidSurSection() {
       })
 
       gsap.fromTo(imageRef.current,
-        { opacity: 0, x: 100 },
+        { opacity: 0, y: 40 },
         {
           opacity: 1,
-          x: 0,
+          y: 0,
           duration: 1.1,
           ease: 'power3.out',
           scrollTrigger: { trigger: imageRef.current, start: 'top 85%', once: true }
