@@ -290,6 +290,21 @@ export async function createReport(reportData) {
   return newReport
 }
 
+export async function deleteReport(id) {
+  if (hasSupabaseConfig()) {
+    try {
+      const admin = createAdminClient()
+      await admin.from('reports').delete().eq('id', id)
+      return true
+    } catch (e) {
+      console.warn('Supabase deleteReport fallback:', e.message)
+    }
+  }
+
+  memoryReports = memoryReports.filter(r => String(r.id) !== String(id))
+  return true
+}
+
 // ---------------- MEDIA ----------------
 export async function getMedia() {
   if (hasSupabaseConfig()) {

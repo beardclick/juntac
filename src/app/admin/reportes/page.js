@@ -1,4 +1,5 @@
 import { getReports } from '@/lib/db'
+import DeleteReportButton from '@/components/admin/DeleteReportButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +31,7 @@ export default async function AdminReportesPage() {
                   <th className="px-6 py-3">Contacto</th>
                   <th className="px-6 py-3">Tipo de Reporte</th>
                   <th className="px-6 py-3">Detalles</th>
+                  <th className="px-6 py-3">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 text-sm">
@@ -53,8 +55,11 @@ export default async function AdminReportesPage() {
                         {r.tipo_reporte}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs text-gray-600 max-w-xs">
+                    <td className="px-6 py-4 text-xs text-gray-600 max-w-xs whitespace-pre-line">
                       {r.detalle_parcheo || r.detalles || '-'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <DeleteReportButton id={r.id} />
                     </td>
                   </tr>
                 ))}
