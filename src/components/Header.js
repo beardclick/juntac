@@ -71,15 +71,15 @@ export default function Header() {
 
           <button
             type="button"
-            className="md:hidden block rounded-lg p-1.5 bg-[#254A39]"
+            className="md:hidden flex flex-col items-center justify-center gap-1.5 rounded-lg p-2 bg-[#254A39]"
             onClick={() => setMenuOpen(true)}
             aria-label="Abrir menú"
             aria-expanded={menuOpen}
             aria-controls="mobile-navigation"
           >
-            <svg className="w-8 h-8" fill="none" stroke="#ffffff" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
+            <span className="block w-7 h-0.5 bg-white rounded-full"></span>
+            <span className="block w-7 h-0.5 bg-white rounded-full"></span>
+            <span className="block w-7 h-0.5 bg-white rounded-full"></span>
           </button>
         </div>
       </header>
