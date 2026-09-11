@@ -12,7 +12,7 @@ export default function NewsCard({ title, slug, excerpt, featured_image, categor
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow group flex flex-col sm:flex-row h-full">
       {/* Image Side */}
-      <div className="sm:w-2/5 relative overflow-hidden h-48 sm:h-auto shrink-0">
+      <Link href={`/noticias/${slug}`} className="sm:w-2/5 relative overflow-hidden h-48 sm:h-auto shrink-0 block" aria-label={title}>
         {featured_image ? (
           <img 
             src={featured_image} 
@@ -24,7 +24,7 @@ export default function NewsCard({ title, slug, excerpt, featured_image, categor
             <svg className="w-12 h-12 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5L18.5 7H20M9 11h4m-4 4h4m-4-8h4"/></svg>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Content Side */}
       <div className="p-6 flex flex-col justify-center sm:w-3/5">

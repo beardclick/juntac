@@ -1,4 +1,5 @@
 import PageHeader from '@/components/PageHeader'
+import GalleryLightbox from '@/components/GalleryLightbox'
 import Link from 'next/link'
 import { getNewsBySlug, getNews } from '@/lib/db'
 import { notFound } from 'next/navigation'
@@ -89,13 +90,7 @@ export default async function NoticiaDetailPage({ params }) {
           {noticia.gallery && noticia.gallery.length > 0 && (
             <div className="mt-12 pt-8 border-t border-gray-200">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Galería de Fotos</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {noticia.gallery.map((imgUrl, i) => (
-                  <div key={i} className="rounded-xl overflow-hidden shadow-sm h-48 bg-gray-100">
-                    <img src={imgUrl} alt={`Foto ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
-                  </div>
-                ))}
-              </div>
+              <GalleryLightbox images={noticia.gallery} />
             </div>
           )}
 
