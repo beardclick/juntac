@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 export const dynamic = 'force-dynamic'
 
 export default async function EditarCompraPage({ params }) {
-  const { id } = params
+  const { id } = await params
   const purchases = await getPurchases()
   const purchase = purchases.find(p => String(p.id) === String(id))
 

@@ -11,7 +11,7 @@ function toPlainText(value = '') {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = params
+  const { slug } = await params
   const noticia = await getNewsBySlug(slug)
   if (!noticia) return { title: 'Noticia | Junta Comunal David Sur' }
   return {
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function NoticiaDetailPage({ params }) {
-  const { slug } = params
+  const { slug } = await params
   const noticia = await getNewsBySlug(slug)
 
   if (!noticia) {

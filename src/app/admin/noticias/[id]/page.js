@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 export const dynamic = 'force-dynamic'
 
 export default async function EditarNoticiaPage({ params }) {
-  const { id } = params
+  const { id } = await params
   const { news } = await getNews({ limit: 100 })
   const noticia = news.find(n => String(n.id) === String(id))
 

@@ -17,7 +17,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Autenticación no configurada' }, { status: 503 })
     }
 
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {

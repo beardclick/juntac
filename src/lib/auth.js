@@ -14,7 +14,7 @@ export async function isAdminAuthenticated() {
   }
 
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
     const { data: { user }, error } = await supabase.auth.getUser()
     return !error && !!user
   } catch (e) {

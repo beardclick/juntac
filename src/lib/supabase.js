@@ -15,8 +15,8 @@ export function createClient() {
 /**
  * Supabase client for Server Components, Server Actions, and Route Handlers
  */
-export function createServerClient() {
-  const cookieStore = cookies()
+export async function createServerClient() {
+  const cookieStore = await cookies()
 
   return createSSRServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,

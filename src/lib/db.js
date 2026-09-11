@@ -25,7 +25,7 @@ function hasSupabaseConfig() {
 async function resolveCategoryId(categoryName) {
   if (!categoryName) return null
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
     const { data, error } = await supabase
       .from('categories')
       .select('id')
@@ -51,7 +51,7 @@ async function prepareNewsPayload(newsData) {
 export async function getNews({ limit = 100, page = 1 } = {}) {
   if (hasSupabaseConfig()) {
     try {
-      const supabase = createServerClient()
+      const supabase = await createServerClient()
       const from = (page - 1) * limit
       const to = from + limit - 1
       const { data, error, count } = await supabase
@@ -85,7 +85,7 @@ export async function getNews({ limit = 100, page = 1 } = {}) {
 export async function getNewsBySlug(slug) {
   if (hasSupabaseConfig()) {
     try {
-      const supabase = createServerClient()
+      const supabase = await createServerClient()
       const { data, error } = await supabase
         .from('news')
         .select('*, categories(name, slug)')
@@ -168,7 +168,7 @@ export async function getPurchases() {
 
   if (hasSupabaseConfig()) {
     try {
-      const supabase = createServerClient()
+      const supabase = await createServerClient()
       const { data, error } = await supabase
         .from('purchases')
         .select('*')

@@ -7,7 +7,7 @@ export async function POST() {
 
   if (url && !url.includes('your_supabase') && key && !key.includes('your_supabase')) {
     try {
-      const supabase = createServerClient()
+      const supabase = await createServerClient()
       await supabase.auth.signOut()
     } catch (e) {
       console.warn('Logout signOut warning:', e.message)

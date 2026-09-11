@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation'
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }) {
-  const { slug } = params
+  const { slug } = await params
   const purchase = await getPurchaseBySlug(slug)
   if (!purchase) return { title: 'Acto Público | Junta Comunal David Sur' }
   return {
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function PurchaseDetailPage({ params }) {
-  const { slug } = params
+  const { slug } = await params
   const purchase = await getPurchaseBySlug(slug)
 
   if (!purchase) {

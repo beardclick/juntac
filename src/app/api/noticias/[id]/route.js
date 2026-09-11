@@ -4,7 +4,7 @@ import { isAdminAuthenticated } from '@/lib/auth'
 
 export async function GET(request, { params }) {
   try {
-    const { id } = params
+    const { id } = await params
     const { news } = await getNews({ limit: 100 })
     const noticia = news.find(n => String(n.id) === String(id))
 
@@ -24,7 +24,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
     const updated = await updateNews(id, body)
 
@@ -44,7 +44,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
     await deleteNews(id)
     return NextResponse.json({ success: true })
   } catch (error) {

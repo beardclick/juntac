@@ -10,7 +10,8 @@ export const metadata = {
 }
 
 export default async function NoticiasPage({ searchParams }) {
-  const page = parseInt(searchParams.page || '1')
+  const sp = await searchParams
+  const page = parseInt(sp.page || '1')
   const limit = 9
   const { news: noticias, total } = await getNews({ page, limit })
   const totalPages = Math.ceil(total / limit)
