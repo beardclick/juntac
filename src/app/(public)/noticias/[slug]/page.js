@@ -10,6 +10,19 @@ function toPlainText(value = '') {
   return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
+function normalizeGallery(g) {
+  if (!Array.isArray(g) || g.length === 0) return []
+  if (typeof g[0] === 'object' && g[0] !== null) {
+    return g
+      .map((item) => ({
+        title: typeof item.title === 'string' ? item.title : '',
+        images: Array.isArray(item.images) ? item.images : [],
+      }))
+      .filter((item) => item.images.length > 0)
+  }
+  return [{ title: '', images: g.filter((x) => typeof x === 'string') }]
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = await params
   const noticia = await getNewsBySlug(slug)
@@ -86,13 +99,15 @@ export default async function NoticiaDetailPage({ params }) {
             dangerouslySetInnerHTML={{ __html: noticia.content }}
           />
 
-          {/* Gallery if present */}
-          {noticia.gallery && noticia.gallery.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-gray-200">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Galería de Fotos</h3>
-              <GalleryLightbox images={noticia.gallery} />
+          {/* Galleries if present */}
+          {normalizeGallery(noticia.gallery).map((g, i) => (
+            <div key={i} className="mt-12 pt-8 border-t border-gray-200">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                {g.title || `Galería ${i + 1}`}
+              </h3>
+              <GalleryLightbox images={g.images} />
             </div>
-          )}
+          ))}
 
           {/* Other recent news */}
           {otherNews.length > 0 && (

@@ -3,6 +3,19 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+// Normalize the gallery field: new format is [{ title, images: [] }].
+// Legacy format (array of strings) becomes a single untitled gallery.
+function normalizeGallery(g) {
+  if (!Array.isArray(g) || g.length === 0) return []
+  if (typeof g[0] === 'object' && g[0] !== null) {
+    return g.map((item) => ({
+      title: typeof item.title === 'string' ? item.title : '',
+      images: Array.isArray(item.images) ? item.images : [],
+    }))
+  }
+  return [{ title: '', images: g.filter((x) => typeof x === 'string') }]
+}
+
 export default function NewsForm({ initialData, isEdit = false }) {
   const router = useRouter()
 
@@ -14,13 +27,14 @@ export default function NewsForm({ initialData, isEdit = false }) {
     excerpt: initialData?.excerpt || '',
     content: initialData?.content || '',
     featured_image: initialData?.featured_image || '',
-    gallery: initialData?.gallery || []
+    gallery: normalizeGallery(initialData?.gallery)
   })
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
   const [showMediaPicker, setShowMediaPicker] = useState(false)
+  const [pickerTarget, setPickerTarget] = useState(null)
   const [mediaLibrary, setMediaLibrary] = useState([])
   const [mediaLoading, setMediaLoading] = useState(false)
 
@@ -64,7 +78,28 @@ export default function NewsForm({ initialData, isEdit = false }) {
     }
   }
 
-  const handleGalleryUpload = async (e) => {
+  const addGallery = () => {
+    setFormData(prev => ({
+      ...prev,
+      gallery: [...prev.gallery, { title: '', images: [] }]
+    }))
+  }
+
+  const removeGallery = (gIdx) => {
+    setFormData(prev => ({
+      ...prev,
+      gallery: prev.gallery.filter((_, i) => i !== gIdx)
+    }))
+  }
+
+  const updateGalleryTitle = (gIdx, title) => {
+    setFormData(prev => ({
+      ...prev,
+      gallery: prev.gallery.map((g, i) => (i === gIdx ? { ...g, title } : g))
+    }))
+  }
+
+  const handleGalleryUpload = async (e, gIdx) => {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
     setUploading(true)
@@ -75,7 +110,10 @@ export default function NewsForm({ initialData, isEdit = false }) {
         const res = await fetch('/api/media', { method: 'POST', body: fd })
         const data = await res.json()
         if (res.ok && data.url) {
-          setFormData(prev => ({ ...prev, gallery: [...prev.gallery, data.url] }))
+          setFormData(prev => ({
+            ...prev,
+            gallery: prev.gallery.map((g, i) => (i === gIdx ? { ...g, images: [...g.images, data.url] } : g))
+          }))
         }
       }
     } catch (err) {
@@ -86,7 +124,8 @@ export default function NewsForm({ initialData, isEdit = false }) {
     }
   }
 
-  const openMediaPicker = async () => {
+  const openMediaPicker = async (gIdx) => {
+    setPickerTarget(gIdx)
     setShowMediaPicker(true)
     setMediaLoading(true)
     try {
@@ -105,16 +144,21 @@ export default function NewsForm({ initialData, isEdit = false }) {
   }
 
   const selectMedia = (url) => {
+    if (pickerTarget === null) return
     setFormData(prev => ({
       ...prev,
-      gallery: prev.gallery.includes(url) ? prev.gallery : [...prev.gallery, url]
+      gallery: prev.gallery.map((g, i) => (i === pickerTarget
+        ? (g.images.includes(url) ? g : { ...g, images: [...g.images, url] })
+        : g))
     }))
   }
 
-  const handleRemoveGalleryImage = (idx) => {
+  const removeImageFromGallery = (gIdx, imgIdx) => {
     setFormData(prev => ({
       ...prev,
-      gallery: prev.gallery.filter((_, i) => i !== idx)
+      gallery: prev.gallery.map((g, i) => (i === gIdx
+        ? { ...g, images: g.images.filter((_, j) => j !== imgIdx) }
+        : g))
     }))
   }
 
@@ -297,52 +341,88 @@ export default function NewsForm({ initialData, isEdit = false }) {
           </div>
         </div>
 
-        {/* Gallery */}
+        {/* Galleries */}
         <div className="border-t pt-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Galería de Imágenes Adicionales
-          </label>
-
-          <div className="flex flex-wrap gap-2 mb-4">
-            <label className="cursor-pointer inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg">
-              <span>{uploading ? 'Subiendo...' : 'Subir imágenes (lote)'}</span>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                className="hidden"
-                onChange={handleGalleryUpload}
-                disabled={uploading}
-              />
+          <div className="flex items-center justify-between mb-4">
+            <label className="block text-sm font-semibold text-gray-700">
+              Galerías de Imágenes
             </label>
             <button
               type="button"
-              onClick={openMediaPicker}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm rounded-lg border border-gray-300"
+              onClick={addGallery}
+              className="px-4 py-2 bg-[#254A39] hover:bg-[#1a3829] text-white font-semibold text-sm rounded-lg"
             >
-              Seleccionar de la galería
+              + Agregar galería
             </button>
           </div>
 
-          {formData.gallery.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
-              {formData.gallery.map((imgUrl, i) => (
-                <div key={i} className="relative group rounded-lg overflow-hidden border bg-gray-100 aspect-square">
-                  <img src={imgUrl} alt={`Gallery ${i}`} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveGalleryImage(i)}
-                    className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow"
-                    aria-label="Quitar imagen"
-                  >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            </div>
+          {formData.gallery.length === 0 && (
+            <p className="text-sm text-gray-500 mb-4">
+              No hay galerías. Agrega una galería para subir imágenes.
+            </p>
           )}
+
+          {formData.gallery.map((g, gIdx) => (
+            <div key={gIdx} className="border border-gray-200 rounded-xl p-4 mb-4 bg-gray-50">
+              <div className="flex items-center gap-3 mb-3">
+                <input
+                  type="text"
+                  value={g.title}
+                  onChange={(e) => updateGalleryTitle(gIdx, e.target.value)}
+                  placeholder={`Título de la galería ${gIdx + 1} (opcional)`}
+                  className="flex-1 px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-600 outline-none text-gray-900"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeGallery(gIdx)}
+                  className="px-3 py-2 text-red-600 hover:text-red-800 font-semibold text-sm shrink-0"
+                >
+                  Eliminar
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mb-3">
+                <label className="cursor-pointer inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg">
+                  <span>{uploading ? 'Subiendo...' : 'Subir imágenes (lote)'}</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleGalleryUpload(e, gIdx)}
+                    disabled={uploading}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => openMediaPicker(gIdx)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm rounded-lg border border-gray-300"
+                >
+                  Seleccionar de la galería
+                </button>
+              </div>
+
+              {g.images.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                  {g.images.map((imgUrl, iIdx) => (
+                    <div key={iIdx} className="relative group rounded-lg overflow-hidden border bg-gray-100 aspect-square">
+                      <img src={imgUrl} alt={`Imagen ${iIdx + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImageFromGallery(gIdx, iIdx)}
+                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow"
+                        aria-label="Quitar imagen"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
 
         {/* Media picker modal */}
@@ -376,7 +456,7 @@ export default function NewsForm({ initialData, isEdit = false }) {
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {mediaLibrary.map((m, i) => {
-                    const selected = formData.gallery.includes(m.url)
+                    const selected = pickerTarget !== null && formData.gallery[pickerTarget]?.images.includes(m.url)
                     return (
                       <button
                         key={i}

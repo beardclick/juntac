@@ -29,3 +29,7 @@ npm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Other local projects (not part of this app)
+/panalegal/
+/web lawyer/
