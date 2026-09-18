@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createReport } from '@/lib/db'
 import { createAdminClient } from '@/lib/supabase'
+import { compressImage, isCompressibleImage } from '@/lib/image'
 import nodemailer from 'nodemailer'
 
 export async function POST(request) {
@@ -35,20 +36,32 @@ export async function POST(request) {
       try {
         const admin = createAdminClient()
         for (const file of fotos) {
-          const bytes = Buffer.from(await file.arrayBuffer())
-          const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
+          let bytes = Buffer.from(await file.arrayBuffer())
+          let ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
+          let contentType = file.type || 'image/jpeg'
+
+          if (isCompressibleImage(file.type)) {
+            try {
+              bytes = await compressImage(bytes)
+              ext = 'webp'
+              contentType = 'image/webp'
+            } catch (compressErr) {
+              console.warn('Foto compression skipped:', compressErr.message)
+            }
+          }
+
           const unique = `reporte-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
           const { error } = await admin.storage
             .from('media')
-            .upload(unique, bytes, { contentType: file.type || 'image/jpeg', upsert: true })
+            .upload(unique, bytes, { contentType, upsert: true })
 
           if (!error) {
             const { data } = admin.storage.from('media').getPublicUrl(unique)
             if (data?.publicUrl) photoUrls.push(data.publicUrl)
           }
 
-          attachments.push({ filename: file.name || `foto-${attachments.length + 1}.jpg`, content: bytes })
+          attachments.push({ filename: `foto-${attachments.length + 1}.${ext}`, content: bytes })
         }
       } catch (e) {
         console.warn('Foto upload warning:', e.message)

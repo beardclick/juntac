@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getMedia, addMedia, deleteMedia } from '@/lib/db'
 import { createAdminClient } from '@/lib/supabase'
 import { isAdminAuthenticated } from '@/lib/auth'
+import { compressImage, isCompressibleImage } from '@/lib/image'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
@@ -28,11 +29,23 @@ export async function POST(request) {
     }
 
     const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    let buffer = Buffer.from(bytes)
+    let contentType = file.type
+    let ext = path.extname(file.name)
+
+    // Compress raster images to WebP (~under 200 KB) before storing
+    if (isCompressibleImage(file.type)) {
+      try {
+        buffer = await compressImage(buffer)
+        contentType = 'image/webp'
+        ext = '.webp'
+      } catch (compressErr) {
+        console.warn('Image compression skipped:', compressErr.message)
+      }
+    }
 
     const originalName = file.name
-    const ext = path.extname(originalName)
-    const cleanBaseName = path.basename(originalName, ext)
+    const cleanBaseName = path.basename(originalName, path.extname(originalName))
       .toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/[\s_-]+/g, '-')
@@ -51,7 +64,7 @@ export async function POST(request) {
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from(bucket)
           .upload(uniqueFilename, buffer, {
-            contentType: file.type,
+            contentType,
             upsert: true
           })
 
@@ -83,8 +96,8 @@ export async function POST(request) {
     const mediaRecord = await addMedia({
       filename: uniqueFilename,
       original_name: originalName,
-      mime_type: file.type,
-      size: file.size,
+      mime_type: contentType,
+      size: buffer.length,
       url: fileUrl
     })
 
