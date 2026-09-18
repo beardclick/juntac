@@ -124,8 +124,7 @@ export default function NewsForm({ initialData, isEdit = false }) {
     }
   }
 
-  const openMediaPicker = async (gIdx) => {
-    setPickerTarget(gIdx)
+  const fetchMediaLibrary = async () => {
     setShowMediaPicker(true)
     setMediaLoading(true)
     try {
@@ -143,11 +142,32 @@ export default function NewsForm({ initialData, isEdit = false }) {
     setMediaLoading(false)
   }
 
+  const openGalleryPicker = async (gIdx) => {
+    setPickerTarget({ type: 'gallery', index: gIdx })
+    await fetchMediaLibrary()
+  }
+
+  const openFeaturedPicker = async () => {
+    setPickerTarget({ type: 'featured' })
+    await fetchMediaLibrary()
+  }
+
+  const isSelected = (url) => {
+    if (!pickerTarget) return false
+    if (pickerTarget.type === 'featured') return formData.featured_image === url
+    return formData.gallery[pickerTarget.index]?.images.includes(url)
+  }
+
   const selectMedia = (url) => {
-    if (pickerTarget === null) return
+    if (!pickerTarget) return
+    if (pickerTarget.type === 'featured') {
+      setFormData(prev => ({ ...prev, featured_image: url }))
+      return
+    }
+    const gIdx = pickerTarget.index
     setFormData(prev => ({
       ...prev,
-      gallery: prev.gallery.map((g, i) => (i === pickerTarget
+      gallery: prev.gallery.map((g, i) => (i === gIdx
         ? (g.images.includes(url) ? g : { ...g, images: [...g.images, url] })
         : g))
     }))
@@ -327,6 +347,13 @@ export default function NewsForm({ initialData, isEdit = false }) {
                   onChange={handleFeaturedImageUpload}
                 />
               </label>
+              <button
+                type="button"
+                onClick={openFeaturedPicker}
+                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg border border-gray-300 font-semibold text-sm flex items-center shrink-0"
+              >
+                Seleccionar de la galería
+              </button>
             </div>
 
             {formData.featured_image && (
@@ -395,7 +422,7 @@ export default function NewsForm({ initialData, isEdit = false }) {
                 </label>
                 <button
                   type="button"
-                  onClick={() => openMediaPicker(gIdx)}
+                  onClick={() => openGalleryPicker(gIdx)}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm rounded-lg border border-gray-300"
                 >
                   Seleccionar de la galería
@@ -456,7 +483,7 @@ export default function NewsForm({ initialData, isEdit = false }) {
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {mediaLibrary.map((m, i) => {
-                    const selected = pickerTarget !== null && formData.gallery[pickerTarget]?.images.includes(m.url)
+                    const selected = isSelected(m.url)
                     return (
                       <button
                         key={i}
