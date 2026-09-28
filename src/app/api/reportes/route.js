@@ -139,6 +139,7 @@ export async function POST(request) {
     return NextResponse.json({ success: true, report: savedReport })
   } catch (error) {
     console.error('Report API Error:', error)
-    return NextResponse.json({ error: 'Error interno al procesar el reporte.' }, { status: 500 })
+    const msg = error && error.message ? error.message : String(error)
+    return NextResponse.json({ error: `Error interno al procesar el reporte: ${msg}` }, { status: 500 })
   }
 }
