@@ -6,7 +6,12 @@ import nodemailer from 'nodemailer'
 
 export async function POST(request) {
   try {
-    const formData = await request.formData()
+    let formData
+    try {
+      formData = await request.formData()
+    } catch (e) {
+      return NextResponse.json({ error: 'Los archivos adjuntos son demasiado pesados. Reduce el tamaño de las fotos e intenta nuevamente.' }, { status: 413 })
+    }
     const get = (k) => (formData.get(k) || '').toString().trim()
 
     const nombre = get('nombre')
@@ -28,6 +33,16 @@ export async function POST(request) {
     const fotos = formData
       .getAll('fotos')
       .filter((f) => f && typeof f === 'object' && typeof f.arrayBuffer === 'function' && f.name)
+
+    // Validate photos (size + type) with clear messages
+    for (const file of fotos) {
+      if (file.size > 10 * 1024 * 1024) {
+        return NextResponse.json({ error: 'Una de las fotos es demasiado pesada (máximo 10 MB). Usa una imagen más pequeña.' }, { status: 413 })
+      }
+      if (!isCompressibleImage(file.type)) {
+        return NextResponse.json({ error: 'Solo se permiten imágenes (JPG, PNG o WebP). Revisa los archivos adjuntos.' }, { status: 400 })
+      }
+    }
 
     const photoUrls = []
     const attachments = []

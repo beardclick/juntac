@@ -28,6 +28,41 @@ function conditionalFields(tipo) {
 const inputClass = "w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#254A39] outline-none text-gray-900"
 const labelClass = "block text-sm font-semibold text-gray-700 mb-2"
 
+// Compress an image in the browser (resize + JPEG) before uploading.
+function compressImage(file, maxDim = 1600, quality = 0.8) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      try {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
+        const w = Math.round(img.width * scale)
+        const h = Math.round(img.height * scale)
+        const canvas = document.createElement('canvas')
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, w, h)
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }))
+          } else {
+            resolve(file)
+          }
+        }, 'image/jpeg', quality)
+      } catch (e) {
+        resolve(file)
+      }
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      resolve(file)
+    }
+    img.src = url
+  })
+}
+
 export default function ReportesPage() {
   const [formData, setFormData] = useState({
     nombre: '',
@@ -75,7 +110,10 @@ export default function ReportesPage() {
     try {
       const fd = new FormData()
       Object.entries(formData).forEach(([k, v]) => fd.append(k, v))
-      fotos.forEach((f) => fd.append('fotos', f))
+      for (const f of fotos) {
+        const compressed = await compressImage(f)
+        fd.append('fotos', compressed)
+      }
 
       const res = await fetch('/api/reportes', { method: 'POST', body: fd })
       const data = await res.json()
