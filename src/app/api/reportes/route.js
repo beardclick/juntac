@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createReport } from '@/lib/db'
+import { createReport, getReportRecipients } from '@/lib/db'
 import { createAdminClient } from '@/lib/supabase'
 import { compressImage, isCompressibleImage } from '@/lib/image'
 import nodemailer from 'nodemailer'
@@ -138,14 +138,15 @@ export async function POST(request) {
           </div>
         `
 
+        const recipients = await getReportRecipients()
         await transporter.sendMail({
           from: `"Junta Comunal David Sur" <${process.env.SMTP_USER}>`,
-          to: process.env.REPORT_RECIPIENT || process.env.SMTP_USER,
+          to: recipients.join(','),
           subject: `📢 Nuevo Reporte: ${tipo_reporte} (${nombre} ${apellido})`,
           html,
           attachments,
         })
-        console.log('Report email sent to', process.env.REPORT_RECIPIENT || process.env.SMTP_USER)
+        console.log('Report email sent to', recipients.join(', '))
       } catch (emailErr) {
         console.warn('Email notification error (non-fatal):', emailErr.message)
       }

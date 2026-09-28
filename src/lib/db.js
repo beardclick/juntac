@@ -305,6 +305,55 @@ export async function deleteReport(id) {
   return true
 }
 
+// ---------------- SETTINGS / REPORT RECIPIENTS ----------------
+export async function getReportRecipients() {
+  const env = process.env.REPORT_RECIPIENT
+  const fallback = env ? env.split(',').map((e) => e.trim()).filter(Boolean) : []
+
+  if (hasSupabaseConfig()) {
+    try {
+      const admin = createAdminClient()
+      const { data, error } = await admin
+        .from('settings')
+        .select('value')
+        .eq('key', 'report_recipients')
+        .maybeSingle()
+
+      if (!error && data && data.value) {
+        const parsed = JSON.parse(data.value)
+        if (Array.isArray(parsed)) {
+          const emails = parsed.filter((e) => typeof e === 'string' && e.trim())
+          if (emails.length > 0) return emails
+        }
+      }
+    } catch (e) {
+      console.warn('Supabase getReportRecipients fallback:', e.message)
+    }
+  }
+
+  return fallback
+}
+
+export async function setReportRecipients(emails) {
+  const clean = (Array.isArray(emails) ? emails : [])
+    .map((e) => String(e).trim())
+    .filter((e) => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))
+
+  if (hasSupabaseConfig()) {
+    try {
+      const admin = createAdminClient()
+      await admin
+        .from('settings')
+        .upsert({ key: 'report_recipients', value: JSON.stringify(clean), updated_at: new Date().toISOString() })
+      return clean
+    } catch (e) {
+      console.warn('Supabase setReportRecipients fallback:', e.message)
+    }
+  }
+
+  return clean
+}
+
 // ---------------- MEDIA ----------------
 export async function getMedia() {
   if (hasSupabaseConfig()) {

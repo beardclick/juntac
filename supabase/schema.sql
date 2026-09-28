@@ -313,3 +313,18 @@ Esta actividad busca recuperar y mantener en óptimas condiciones este important
     '2025-09-05 08:30:00+00'
   )
 ON CONFLICT (slug) DO NOTHING;
+
+-- ==============================================================================
+-- SETTINGS (key/value) — admin-managed configuration such as report recipient
+-- emails. Stored as a JSON array under the key 'report_recipients'.
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admin full access settings" ON settings;
+CREATE POLICY "Admin full access settings" ON settings FOR ALL USING (auth.role() = 'authenticated');
