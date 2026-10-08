@@ -65,6 +65,7 @@ export default function ReportesPage({ config = defaultReportForm }) {
   const [status, setStatus] = useState({ type: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileRef = useRef(null)
+  const websiteRef = useRef(null)
 
   const fields = config.options.find(option => option.label === formData.tipo_reporte) || {}
 
@@ -99,6 +100,7 @@ export default function ReportesPage({ config = defaultReportForm }) {
     try {
       const fd = new FormData()
       Object.entries(formData).forEach(([k, v]) => fd.append(k, v))
+      fd.append('website', websiteRef.current?.value || '')
       for (const f of fotos) {
         const compressed = await compressImage(f)
         fd.append('fotos', compressed)
@@ -170,6 +172,11 @@ export default function ReportesPage({ config = defaultReportForm }) {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Honeypot: outside the viewport and excluded from keyboard/screen readers. */}
+                <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: '1px', height: '1px', overflow: 'hidden' }}>
+                  <label htmlFor="report-website">Deja este campo vacío</label>
+                  <input ref={websiteRef} id="report-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+                </div>
                 {/* Nombre | Apellido */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>

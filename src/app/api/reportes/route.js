@@ -13,6 +13,10 @@ export async function POST(request) {
     } catch (e) {
       return NextResponse.json({ error: 'Los archivos adjuntos son demasiado pesados. Reduce el tamaño de las fotos e intenta nuevamente.' }, { status: 413 })
     }
+    // Silently discard automated submissions before any database, storage or email work.
+    if (formData.getAll('website').some(value => typeof value !== 'string' || value.trim() !== '')) {
+      return NextResponse.json({ success: true })
+    }
     const get = (k) => (formData.get(k) || '').toString().trim()
 
     const nombre = get('nombre')
