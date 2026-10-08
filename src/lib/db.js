@@ -1,6 +1,7 @@
 import { initialPurchases, initialCategories } from './initial-data'
 import wordpressNews from './wordpress-news.json'
 import { createServerClient, createAdminClient } from './supabase'
+import { cache } from 'react'
 
 // In-memory runtime storage for when Supabase is not connected
 let memoryNews = [...wordpressNews]
@@ -82,7 +83,7 @@ export async function getNews({ limit = 100, page = 1 } = {}) {
   }
 }
 
-export async function getNewsBySlug(slug) {
+export const getNewsBySlug = cache(async function getNewsBySlug(slug) {
   if (hasSupabaseConfig()) {
     try {
       const supabase = await createServerClient()
@@ -104,7 +105,7 @@ export async function getNewsBySlug(slug) {
   }
 
   return memoryNews.find(n => n.slug === slug) || null
-}
+})
 
 export async function createNews(newsData) {
   if (hasSupabaseConfig()) {

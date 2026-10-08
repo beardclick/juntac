@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 
 export async function middleware(request) {
   const pathname = request.nextUrl.pathname
+  // Public visits do not need a session refresh or an Auth request.
+  if (!pathname.startsWith('/admin')) return NextResponse.next()
 
   // Skip static files & API routes that don't need auth checking
   if (
@@ -20,5 +22,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|images|uploads|valores).*)'],
+  matcher: ['/admin/:path*'],
 }

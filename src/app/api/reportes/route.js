@@ -3,6 +3,7 @@ import { createReport, getReportRecipients } from '@/lib/db'
 import { createAdminClient } from '@/lib/supabase'
 import { compressImage, isCompressibleImage } from '@/lib/image'
 import nodemailer from 'nodemailer'
+import { getReportForm } from '@/lib/report-form-server'
 
 export async function POST(request) {
   try {
@@ -27,6 +28,12 @@ export async function POST(request) {
 
     if (!nombre || !apellido || !cedula || !email || !tipo_reporte) {
       return NextResponse.json({ error: 'Faltan campos requeridos obligatorios (*).' }, { status: 400 })
+    }
+    const config = await getReportForm()
+    const option = config.options.find(item => item.label === tipo_reporte)
+    if (!option) return NextResponse.json({ error: 'La opción seleccionada ya no está disponible. Recarga el formulario.' }, { status: 400 })
+    if ((option.direccion && !direccion) || (option.seguimiento && !seguimiento) || (option.especificar && !especificar)) {
+      return NextResponse.json({ error: 'Completa los campos requeridos de esta opción.' }, { status: 400 })
     }
 
     // Upload photos to Supabase Storage (bucket "media")

@@ -1,10 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
+import ReportFormSettings from '@/components/admin/ReportFormSettings'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default function ConfiguracionPage() {
   const [recipients, setRecipients] = useState([])
+  const [form, setForm] = useState(null)
   const [newEmail, setNewEmail] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -12,9 +14,9 @@ export default function ConfiguracionPage() {
 
   useEffect(() => {
     fetch('/api/settings')
-      .then((r) => r.json())
-      .then((d) => { if (Array.isArray(d.recipients)) setRecipients(d.recipients) })
-      .catch(() => {})
+      .then(async (r) => { const data = await r.json(); if (!r.ok) throw new Error(data.error || 'No se pudo cargar la configuración.'); return data })
+      .then((d) => { if (Array.isArray(d.recipients)) setRecipients(d.recipients); if (d.form) setForm(d.form) })
+      .catch((error) => setMessage(error.message))
       .finally(() => setLoading(false))
   }, [])
 
@@ -45,11 +47,12 @@ export default function ConfiguracionPage() {
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipients }),
+        body: JSON.stringify({ recipients, form }),
       })
       const data = await res.json()
       if (res.ok) {
         setRecipients(data.recipients || [])
+        if (data.form) setForm(data.form)
         setMessage('✅ Guardado correctamente.')
       } else {
         setMessage(data.error || 'Error al guardar.')
@@ -70,6 +73,7 @@ export default function ConfiguracionPage() {
         </p>
       </div>
 
+      <ReportFormSettings value={form} onChange={setForm} />
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 md:p-8 max-w-2xl">
         <h3 className="text-lg font-bold text-gray-900 mb-2">Correos destinatarios de reportes</h3>
         <p className="text-sm text-gray-500 mb-6">
@@ -120,7 +124,7 @@ export default function ConfiguracionPage() {
         <button
           type="button"
           onClick={save}
-          disabled={saving}
+          disabled={saving || loading || !form}
           className="px-6 py-2.5 bg-[#254A39] hover:bg-[#1a3829] text-white font-bold rounded-lg transition disabled:opacity-60"
         >
           {saving ? 'Guardando...' : 'Guardar cambios'}
