@@ -1,9 +1,22 @@
 import { NextResponse } from 'next/server'
-import { createReport, getReportRecipients } from '@/lib/db'
+import { createReport, getReports, getReportRecipients } from '@/lib/db'
 import { createAdminClient } from '@/lib/supabase'
+import { isAdminAuthenticated } from '@/lib/auth'
 import { compressImage, isCompressibleImage } from '@/lib/image'
 import nodemailer from 'nodemailer'
 import { getReportForm } from '@/lib/report-form-server'
+
+export async function GET() {
+  try {
+    if (!(await isAdminAuthenticated())) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+    const reports = await getReports()
+    return NextResponse.json({ reports })
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
 
 export async function POST(request) {
   try {

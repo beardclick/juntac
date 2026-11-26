@@ -1,5 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
+import Pagination from '@/components/Pagination'
+
+const PAGE_SIZE = 12
 
 export default function AdminMediaPage() {
   const [media, setMedia] = useState([])
@@ -7,6 +10,7 @@ export default function AdminMediaPage() {
   const [uploading, setUploading] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
   const [filterType, setFilterType] = useState('all')
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     fetchMedia()
@@ -73,6 +77,10 @@ export default function AdminMediaPage() {
     return true
   })
 
+  const totalPages = Math.max(1, Math.ceil(filteredMedia.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const paginatedMedia = filteredMedia.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -102,7 +110,7 @@ export default function AdminMediaPage() {
       {/* Filter Tabs */}
       <div className="flex space-x-2 border-b pb-3">
         <button
-          onClick={() => setFilterType('all')}
+          onClick={() => { setFilterType('all'); setPage(1) }}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
             filterType === 'all' ? 'bg-[#254A39] text-white' : 'bg-gray-100 text-gray-700'
           }`}
@@ -110,7 +118,7 @@ export default function AdminMediaPage() {
           Todos ({media.length})
         </button>
         <button
-          onClick={() => setFilterType('images')}
+          onClick={() => { setFilterType('images'); setPage(1) }}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
             filterType === 'images' ? 'bg-[#254A39] text-white' : 'bg-gray-100 text-gray-700'
           }`}
@@ -118,7 +126,7 @@ export default function AdminMediaPage() {
           Imágenes
         </button>
         <button
-          onClick={() => setFilterType('pdfs')}
+          onClick={() => { setFilterType('pdfs'); setPage(1) }}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
             filterType === 'pdfs' ? 'bg-[#254A39] text-white' : 'bg-gray-100 text-gray-700'
           }`}
@@ -137,8 +145,9 @@ export default function AdminMediaPage() {
           No hay archivos subidos en esta categoría.
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {filteredMedia.map((item) => {
+          {paginatedMedia.map((item) => {
             const isPdf = item.mime_type?.includes('pdf') || item.filename?.endsWith('.pdf')
             return (
               <div
@@ -210,6 +219,8 @@ export default function AdminMediaPage() {
             )
           })}
         </div>
+        <Pagination page={currentPage} totalPages={totalPages} onChange={setPage} totalItems={filteredMedia.length} pageSize={PAGE_SIZE} />
+        </>
       )}
     </div>
   )

@@ -1,12 +1,16 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Pagination from '@/components/Pagination'
+
+const PAGE_SIZE = 10
 
 export default function AdminNoticiasPage() {
   const [news, setNews] = useState([])
   const [loading, setLoading] = useState(true)
   const [categoryFilter, setCategoryFilter] = useState('todas')
   const [searchTerm, setSearchTerm] = useState('')
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     fetchNews()
@@ -48,6 +52,10 @@ export default function AdminNoticiasPage() {
     return matchesCat && matchesSearch
   })
 
+  const totalPages = Math.max(1, Math.ceil(filteredNews.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const paginatedNews = filteredNews.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -72,7 +80,7 @@ export default function AdminNoticiasPage() {
       <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center">
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button
-            onClick={() => setCategoryFilter('todas')}
+            onClick={() => { setCategoryFilter('todas'); setPage(1) }}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
               categoryFilter === 'todas'
                 ? 'bg-[#254A39] text-white'
@@ -84,7 +92,7 @@ export default function AdminNoticiasPage() {
           {categories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setCategoryFilter(cat)}
+              onClick={() => { setCategoryFilter(cat); setPage(1) }}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
                 categoryFilter === cat
                   ? 'bg-[#254A39] text-white'
@@ -101,7 +109,7 @@ export default function AdminNoticiasPage() {
             type="text"
             placeholder="Buscar noticia..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => { setSearchTerm(e.target.value); setPage(1) }}
             className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#254A39] outline-none"
           />
         </div>
@@ -116,6 +124,7 @@ export default function AdminNoticiasPage() {
             No se encontraron noticias con los filtros actuales.
           </div>
         ) : (
+          <>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -128,7 +137,7 @@ export default function AdminNoticiasPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 text-sm">
-                {filteredNews.map((n) => (
+                {paginatedNews.map((n) => (
                   <tr key={n.id} className="hover:bg-gray-50 transition">
                     <td className="px-6 py-4 w-20">
                       <div className="w-14 h-14 rounded-lg bg-gray-100 overflow-hidden shrink-0 border">
@@ -178,6 +187,8 @@ export default function AdminNoticiasPage() {
               </tbody>
             </table>
           </div>
+          <Pagination page={currentPage} totalPages={totalPages} onChange={setPage} totalItems={filteredNews.length} pageSize={PAGE_SIZE} />
+          </>
         )}
       </div>
     </div>

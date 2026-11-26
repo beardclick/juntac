@@ -1,12 +1,16 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Pagination from '@/components/Pagination'
+
+const PAGE_SIZE = 10
 
 export default function AdminComprasPage() {
   const [purchases, setPurchases] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('todos')
   const [searchTerm, setSearchTerm] = useState('')
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     fetchPurchases()
@@ -46,6 +50,10 @@ export default function AdminComprasPage() {
     return matchesFilter && matchesSearch
   })
 
+  const totalPages = Math.max(1, Math.ceil(filteredPurchases.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const paginatedPurchases = filteredPurchases.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -72,7 +80,7 @@ export default function AdminComprasPage() {
           {['todos', 'activo', 'adjudicado', 'expirado', 'desierto'].map((st) => (
             <button
               key={st}
-              onClick={() => setFilter(st)}
+              onClick={() => { setFilter(st); setPage(1) }}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
                 filter === st
                   ? 'bg-[#254A39] text-white'
@@ -89,7 +97,7 @@ export default function AdminComprasPage() {
             type="text"
             placeholder="Buscar compra..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => { setSearchTerm(e.target.value); setPage(1) }}
             className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#254A39] outline-none"
           />
         </div>
@@ -104,6 +112,7 @@ export default function AdminComprasPage() {
             No se encontraron actos públicos con el filtro actual.
           </div>
         ) : (
+          <>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -117,7 +126,7 @@ export default function AdminComprasPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 text-sm">
-                {filteredPurchases.map((p) => (
+                {paginatedPurchases.map((p) => (
                   <tr key={p.id} className="hover:bg-gray-50 transition">
                     <td className="px-6 py-4 max-w-md">
                       <p className="font-semibold text-gray-900 line-clamp-2">{p.title}</p>
@@ -170,6 +179,8 @@ export default function AdminComprasPage() {
               </tbody>
             </table>
           </div>
+          <Pagination page={currentPage} totalPages={totalPages} onChange={setPage} totalItems={filteredPurchases.length} pageSize={PAGE_SIZE} />
+          </>
         )}
       </div>
     </div>
