@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getMedia, addMedia, deleteMedia } from '@/lib/db'
 import { createAdminClient } from '@/lib/supabase'
 import { isAdminAuthenticated } from '@/lib/auth'
-import { compressImage, isCompressibleImage } from '@/lib/image'
+import { compressImage, shouldCompress } from '@/lib/image'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
@@ -33,8 +33,8 @@ export async function POST(request) {
     let contentType = file.type
     let ext = path.extname(file.name)
 
-    // Compress raster images to WebP (~under 200 KB) before storing
-    if (isCompressibleImage(file.type)) {
+    // Compress raster images (and convert iPhone HEIC) to WebP (~under 200 KB)
+    if (shouldCompress(buffer, file.type)) {
       try {
         buffer = await compressImage(buffer)
         contentType = 'image/webp'

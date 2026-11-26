@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createReport, getReports, getReportRecipients } from '@/lib/db'
 import { createAdminClient } from '@/lib/supabase'
 import { isAdminAuthenticated } from '@/lib/auth'
-import { compressImage, isCompressibleImage } from '@/lib/image'
+import { compressImage, isCompressibleImage, shouldCompress } from '@/lib/image'
 import nodemailer from 'nodemailer'
 import { getReportForm } from '@/lib/report-form-server'
 
@@ -64,7 +64,7 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Una de las fotos es demasiado pesada (máximo 10 MB). Usa una imagen más pequeña.' }, { status: 413 })
       }
       if (!isCompressibleImage(file.type)) {
-        return NextResponse.json({ error: 'Solo se permiten imágenes (JPG, PNG o WebP). Revisa los archivos adjuntos.' }, { status: 400 })
+        return NextResponse.json({ error: 'Solo se permiten imágenes (JPG, PNG, WebP o HEIC). Revisa los archivos adjuntos.' }, { status: 400 })
       }
     }
 
@@ -79,7 +79,7 @@ export async function POST(request) {
           let ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
           let contentType = file.type || 'image/jpeg'
 
-          if (isCompressibleImage(file.type)) {
+          if (shouldCompress(bytes, file.type)) {
             try {
               bytes = await compressImage(bytes)
               ext = 'webp'
